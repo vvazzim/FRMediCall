@@ -14,11 +14,14 @@ import DailyTraffic from "views/admin/default/components/DailyTraffic";
 import TaskCard from "views/admin/default/components/TaskCard";
 import tableDataCheck from "./variables/tableDataCheck.json";
 import tableDataComplex from "./variables/tableDataComplex.json";
+import BannerAcceuil from "./components/BannerAcceuil";
+import Banner from "../paramétres/components/Banner";
 
 const Dashboard = () => {
   return (
     <div>
-      {/* Card widget */}
+    {/* Card widget */}
+
 
       {/*<div className="mt-3 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-3 3xl:grid-cols-6">*/}
       {/*  <Widget*/}
@@ -69,32 +72,28 @@ const Dashboard = () => {
         {/* Traffic chart & Pie Chart */}
 
         <div className="grid grid-cols-1 gap-5 rounded-[20px] md:grid-cols-2">
-          <DailyTraffic />
-          <PieChartCard />
+
+          <BannerAcceuil/>
+          <BannerAcceuil/>
         </div>
 
-        {/* Complex Table , Task & Calendar */}
 
-        <ComplexTable
-          columnsData={columnsDataComplex}
-          tableData={tableDataComplex}
-        />
 
         {/* Task chart & Calendar */}
 
         <div className="grid grid-cols-1 gap-5 rounded-[20px] md:grid-cols-2">
+
+          <BannerAcceuil/>
           <TaskCard />
-          <div className="grid grid-cols-1 rounded-[20px]">
-            <MiniCalendar />
-          </div>
         </div>
       </div>
       {/* Charts */}
 
-      <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
-        <TotalSpent />
-        <WeeklyRevenue />
-      </div>
+
+        <div className="col-span-4 lg:!mb-0">
+            <MiniCalendar />
+
+        </div>
     </div>
   );
 };

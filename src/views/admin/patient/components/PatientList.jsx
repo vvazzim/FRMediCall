@@ -1,35 +1,85 @@
 import React, { useState , useEffect } from 'react';
 import BouttonAjouterP from './AddPatientAction';
 import ThreeDotsDropdown from './dropDownPatient';
-import {obtenirPatient} from "../../../../api";
+import {
+  obtenirConsultationsMedId,
+  obtenirDossiersMedicauxParMedecin,
+  obtenirPatientsParMedecin,
+  obtenirPatientsRdvMedecin
+} from "../../../../api";
+
 import Card from "../../../../components/card";
+import jwt_decode from "jwt-decode";
 
 export default function PatientListPage() {
   const [showModal, setShowModal] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [patients, setPatients] = useState([]);  // add this line
+  const [patients, setPatients] = useState([]);
+  const [search, setSearch] = useState('');
+  const [filters, setFilters] = useState([]);
 
-  const toggleDropdown = () => {
-    setShowDropdown(!showDropdown);
-  };
+  const token = localStorage.getItem('jwt');
 
-  // get patients from API
+  let medecinId;
+
+  if(token) {
+    try {
+      const decodedToken = jwt_decode(token);
+      console.log(decodedToken);
+      medecinId = decodedToken._id;
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      localStorage.removeItem('jwt');
+      window.location.href = '/login';
+    }
+  } else {
+    console.log("No token found in localStorage");
+    window.location.href = '/login';
+  }
 
   useEffect(() => {
-    const getPatients = async () => {
-      const data = await obtenirPatient();
-      setPatients(data);
-    }
+    const getPatientsAndMedicalRecords = async () => {
+      if (!medecinId || !token) return;
+      try {
+        let [medicalRecords, patientsList] = await Promise.all([
+          obtenirDossiersMedicauxParMedecin(medecinId, token),
+          obtenirPatientsRdvMedecin(medecinId, token),
+        ]);
 
-    getPatients();
-  }, []);
+        if (search) {
+          medicalRecords = medicalRecords.filter(record =>
+              record.patient?.nom?.toLowerCase().includes(search.toLowerCase())
+          );
+          patientsList = patientsList.filter(patient =>
+              patient.nom?.toLowerCase().includes(search.toLowerCase())
+          );
+        }
+
+        if (filters.length > 0) {
+          medicalRecords = medicalRecords.filter(record =>
+              filters.includes(record.statut)
+          );
+          // apply filters to patients if needed
+        }
+
+        setPatients([...medicalRecords, ...patientsList]);
+      } catch (error) {
+        console.error('Error fetching patients and medical records:', error);
+      }
+    };
+
+    getPatientsAndMedicalRecords();
+  }, [search, filters, medecinId, token]);
+
+  const handleSearchChange = (event) => {
+    setSearch(event.target.value);
+  }
+
 
   return (
-
-    <Card className="bg-gray-50 dark:bg-navy-900 p-3 sm:p-5 antialiased">
-      <div className="mx-auto max-w-screen-xl px-1 lg:px-19">
-        <div className="bg-white dark:bg-navy-800 relative shadow-md sm:rounded-lg overflow-hidden">
-          <div className="flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4">
+      <Card className="bg-gray-50 dark:bg-navy-900 p-3 sm:p-5 antialiased">
+        <div className="mx-auto max-w-screen-xl px-1 lg:px-19">
+          <div className="bg-white dark:bg-navy-800 relative shadow-md sm:rounded-lg overflow-hidden">
+            <div className="flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4">
             <div className="w-full md:w-1/2">
               <form className="flex items-center">
                 <label for="simple-search" className="sr-only">Recherche</label>
@@ -39,7 +89,12 @@ export default function PatientListPage() {
                       <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
                     </svg>
                   </div>
-                  <input type="text" id="simple-search" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Search" required="" />
+                  <input type="text" id="simple-search"
+                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                         placeholder="Search" required=""
+                         value={search}
+                         onChange={handleSearchChange}/>
+
                 </div>
               </form>
             </div>
@@ -103,78 +158,38 @@ export default function PatientListPage() {
               </div>
             </div>
           </div>
-          <div className="overflow-x max-w-screen-xl h-40">
-            <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-              <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <div className="overflow-auto max-w-screen-xl">
+              <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                <thead>
                 <tr>
-                  <th scope="col" className="px-4 py-4">NOM</th>
+                  <th scope="col" className="px-4 py-3 text-white">NOM</th>
+                  <th scope="col" className="px-4 py-3">PRENOM</th>
                   <th scope="col" className="px-4 py-3">AGE</th>
-                  <th scope="col" className="px-4 py-3">Brand</th>
-                  <th scope="col" className="px-4 py-3">Description</th>
-                  <th scope="col" className="px-4 py-3">Price</th>
-                  <th scope="col" className="px-4 py-3">
-                    <span className="sr-only">Actions</span>
-                  </th>
+                  <th scope="col" className="px-4 py-3">SEXE</th>
+                  <th scope="col" className="px-4 py-3">telephone</th>
+                  <th scope="col" className="px-4 py-3">Type</th>
+                  <th scope="col" className="px-4 py-3">Profile</th>
                 </tr>
-              </thead>
-              <tbody>
-              {patients.map(patient => (
-                  <tr className="border-b dark:border-gray-700 relative">
-                    <th scope="row" className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white">{patient.NSS || ''}</th>
-                    <td className="px-4 py-3">{patient.password || ''}</td>
-                    <td className="px-4 py-3">{patient.prenom || ''}</td>
-                    <td className="px-4 py-3 max-w-[12rem] truncate">{patient.adresse || ''}</td>
-                    <td className="px-4 py-3">{patient.email || ''}</td>
-                    <td className="px-4 py-3 flex items-center justify-end">
-                      <ThreeDotsDropdown/>
-                    </td>
-                  </tr>
-              ))}
-              </tbody>
+                </thead>
+
+                <tbody>
+                {patients.map(patient => (
+                    <tr className="border-b dark:border-gray-700 relative">
+                      <th scope="row" className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white">{patient.nom || ''}</th>
+                      <td className="px-4 py-3">{patient.prenom || ''}</td>
+                      <td className="px-4 py-3">{patient.age || ''}</td>
+                      <td className="px-4 py-3">{patient.sexe || ''}</td>
+                      <td className="px-4 py-3">{patient.telephone || ''}</td>
+                      <td className="px-4 py-3">{patient.type}</td>
+                      <td className="px-4 py-3 flex items-center justify-end">
+                        <ThreeDotsDropdown/>
+                      </td>
+                    </tr>
+                ))}
+                </tbody>
 
             </table>
           </div>
-          <nav className="z-200 flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4" aria-label="Table navigation">
-            <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              Showing
-              <span className="font-semibold text-gray-900 dark:text-white">  1-10  </span>
-              of
-              <span className="font-semibold text-gray-900 dark:text-white">1000</span>
-            </span>
-            <ul className="inline-flex items-stretch -space-x-px">
-              <li>
-                <a href="#" className="flex items-center justify-center h-full py-1.5 px-3 ml-0 text-gray-500 bg-white rounded-l-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-                  <span className="sr-only">Previous</span>
-                  <svg className="w-5 h-5" aria-hidden="true" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
-                  </svg>
-                </a>
-              </li>
-              <li>
-                <a href="#" className="flex items-center justify-center text-sm py-2 px-3 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">1</a>
-              </li>
-              <li>
-                <a href="#" className="flex items-center justify-center text-sm py-2 px-3 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">2</a>
-              </li>
-              <li>
-                <a href="#" aria-current="page" className="flex items-center justify-center text-sm z-10 py-2 px-3 leading-tight text-primary-600 bg-primary-50 border border-primary-300 hover:bg-primary-100 hover:text-primary-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">3</a>
-              </li>
-              <li>
-                <a href="#" className="flex items-center justify-center text-sm py-2 px-3 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">...</a>
-              </li>
-              <li>
-                <a href="#" className="flex items-center justify-center text-sm py-2 px-3 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">100</a>
-              </li>
-              <li>
-                <a href="#" className="flex items-center justify-center h-full py-1.5 px-3 leading-tight text-gray-500 bg-white rounded-r-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-                  <span className="sr-only">Next</span>
-                  <svg className="w-5 h-5" aria-hidden="true" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                  </svg>
-                </a>
-              </li>
-            </ul>
-          </nav>
         </div>
       </div>
     </Card>

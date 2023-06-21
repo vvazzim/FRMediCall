@@ -2,13 +2,15 @@
 import axios from 'axios';
 
 // Configuring Axios Instances for Different Endpoints
-const apiAuth = axios.create({ baseURL: 'http://localhost:5000' });
-const apiUtilisateur = axios.create({ baseURL: 'http://localhost:5000/Utilisateur' });
-export const apiRdv = axios.create({ baseURL: 'http://localhost:5000/Rdv' });
-const apiAgenda = axios.create({ baseURL: 'http://localhost:5000/agendas' });
-const apiCabinetMedical = axios.create({ baseURL: 'http://localhost:5000/cabinetMedical' });
-const apiConsultation = axios.create({ baseURL: 'http://localhost:5000/consultation' });
-const apiUser = axios.create({ baseURL: 'http://localhost:5000/user' });
+const API_BASE_URL = 'http://localhost:5000';
+const apiAuth = axios.create({ baseURL: API_BASE_URL });
+const apiUtilisateur = axios.create({ baseURL: `${API_BASE_URL}/Utilisateur` });
+export const apiRdv = axios.create({ baseURL: `${API_BASE_URL}/Rdv` });
+const apiAgenda = axios.create({ baseURL: `${API_BASE_URL}/agendas` });
+const apiCabinetMedical = axios.create({ baseURL: `${API_BASE_URL}/cabinetMedical` });
+const apiConsultation = axios.create({ baseURL: `${API_BASE_URL}/consultation` });
+const apiUser = axios.create({ baseURL: `${API_BASE_URL}/user` });
+const apiDossierMed = axios.create({ baseURL: `${API_BASE_URL}/dossierMedical` });
 
 // Error Handler Function
 const handleApiError = (error, errorMessage) => {
@@ -18,18 +20,13 @@ const handleApiError = (error, errorMessage) => {
 // Auth Functions
 export const login = async (email, password) => {
   try {
-    const response = await axios.post('http://localhost:5000/login', {
-      email,
-      password,
-    });
+    const response = await apiAuth.post('/login', { email, password });
     return response;
   } catch (error) {
     console.error('Error during login request:', error);
     return Promise.reject(error);
   }
 };
-
-
 
 export const register = async (userData) => {
   try {
@@ -40,27 +37,40 @@ export const register = async (userData) => {
   }
 };
 
-// Patient Functions
-export const obtenirPatient = async () => {
+// Generic Function to Get Users by Type
+const obtenirUtilisateurs = async (typeUtilisateur, token) => {
   try {
-    const response = await apiUtilisateur.get('/', { params: { typeUtilisateur: 'Patient' } });
+    const response = await apiUtilisateur.get('/', {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      params: { typeUtilisateur }
+    });
     return response.data;
   } catch (error) {
-    handleApiError(error, 'Error retrieving patients');
+    handleApiError(error, `Error retrieving ${typeUtilisateur}`);
   }
 };
 
-export const ajouterPatient = async (patientData) => {
+// Generic Function to Add User
+const ajouterUtilisateur = async (typeUtilisateur, data) => {
   try {
-    patientData.typeUtilisateur = 'Patient';
-    const response = await apiUtilisateur.post('/', patientData);
+    const response = await apiUtilisateur.post('/', { ...data, typeUtilisateur });
     return response.data;
   } catch (error) {
-    handleApiError(error, 'Error adding Patient');
+    handleApiError(error, `Error adding ${typeUtilisateur}`);
   }
 };
 
+// Now, you can use these functions to get and add patients, doctors, and assistants
+export const obtenirPatient = async (token) => obtenirUtilisateurs('Patient', token);
+export const obtenirMedecins = async (token) => obtenirUtilisateurs('Medecin', token);
+export const ajouterPatient = async (data) => ajouterUtilisateur('Patient', data);
+export const ajouterMedecin = async (data) => ajouterUtilisateur('Medecin', data);
+export const ajouterAssistant = async (data) => ajouterUtilisateur('Assistant', data);
 
+// Other API calls
 export const obtenirConsultationsPatientConnecte = async (token) => {
   try {
     const response = await apiConsultation.get('/', {
@@ -75,47 +85,60 @@ export const obtenirConsultationsPatientConnecte = async (token) => {
   }
 };
 
-
-
-// Assistant Functions
-export const ajouterAssistant = async (assistantData) => {
+export const obtenirDossiersMedicauxParMedecin = async (medecinId, token) => {
   try {
-    const response = await apiUtilisateur.post('/', assistantData, { params: { typeUtilisateur: 'Assistant' }});
-    return response.data;
+    const response = await apiDossierMed.get(`/auteur/${medecinId}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+    });
+
+    if (response.status !== 200 || !response.data) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    // Assuming each medical record has a 'patient' field that contains patient details
+    const medicalRecords = response.data.map(record => record.patient ? record.patient : record.informationsPatient);
+
+    return medicalRecords;
   } catch (error) {
-    handleApiError(error, 'Error adding assistant');
+    console.error('Failed to fetch medical records:', error);
+    return []; // Return empty array as a fallback
   }
 };
 
 
 
-// Doctor Functions
-export const obtenirMedecins = async () => {
+
+
+export const obtenirRdv = async (id) => {
   try {
-    const response = await apiUtilisateur.get('/', { params: { typeUtilisateur: 'Medecin' } });
+    const response = await apiRdv.get(`/medecin/${id}`);
     return response.data;
   } catch (error) {
-    handleApiError(error, 'Error retrieving doctors');
+    handleApiError(error, 'Erreur lors de la récupération des RDVs');
+    return [];
   }
 };
 
-export const ajouterMedecin = async (medecinData) => {
+export const obtenirConsultationsMedId = async (medecinId, token) => {
   try {
-    medecinData.typeUtilisateur = 'Medecin';
-    const response = await apiUtilisateur.post('/', medecinData);
-    return response.data;
-  } catch (error) {
-    handleApiError(error, 'Error adding doctor');
-  }
-};
+    const response = await apiConsultation.get(`/medecin/${medecinId}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+    });
 
-// Appointment Functions
-export const obtenirRdv = async () => {
-  try {
-    const response = await apiRdv.get('/');
-    return response.data;
+    if (response.status !== 200) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const consultations = response.data;
+    return consultations;
   } catch (error) {
-    handleApiError(error, 'Error retrieving appointments');
+    console.error('Failed to fetch consultations:', error);
   }
 };
 
@@ -128,7 +151,6 @@ export const ajouterRdv = async (rdvData) => {
   }
 };
 
-// Agenda Functions
 export const getAgenda = async (userId) => {
   try {
     const response = await apiAgenda.get(`/${userId}`);
@@ -147,7 +169,6 @@ export const ajouterAgenda = async (agendaData) => {
   }
 };
 
-// Medical Cabinet Functions
 export const obtenirCabinetsMedicaux = async () => {
   try {
     const response = await apiCabinetMedical.get('/');
@@ -176,9 +197,6 @@ export const obtenirConsultation = async () => {
   }
 };
 
-
-
-
 export const obtenirUtilisateur = async (token) => {
   try {
     const response = await apiUser.get('/', {
@@ -192,5 +210,79 @@ export const obtenirUtilisateur = async (token) => {
   }
 };
 
+export const ajouterDossierMedical = async (dossierMedicalData) => {
+  try {
+    const response = await apiDossierMed.post('/', dossierMedicalData);
+    return response.data;
+  } catch (error) {
+    handleApiError(error, 'Error adding medical record');
+  }
+};
 
+export const obtenirPatientsRdvMedecin = async (medecinId, token) => {
+  try {
+    const response = await apiRdv.get(`/medecin/${medecinId}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+    });
+
+    if (response.status !== 200) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    // Assuming each appointment has a 'patient' field that contains patient details
+    const patients = response.data.map(rdv => rdv.patient);
+
+    return patients;
+  } catch (error) {
+    console.error('Failed to fetch patients:', error);
+  }
+};
+
+
+
+export const obtenirPatientsParMedecin = async (medecinId, token) => {
+  try {
+    const response = await apiUtilisateur.get('/', {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      params: { typeUtilisateur: 'Patient' }
+    });
+
+    if (response.status !== 200) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    // Filtrage des patients par medecinId
+    const patients = response.data.filter(patient => patient.medecinId === medecinId);
+
+    return patients;
+  } catch (error) {
+    console.error('Failed to fetch patients:', error);
+  }
+};
+
+
+
+export const obtenirAgenda = async (userId) => {
+  try {
+    const response = await apiAgenda.get(`/${userId}`);
+    return response.data;
+  } catch (error) {
+    handleApiError(error, 'Erreur lors de la récupération de l\'agenda');
+  }
+};
+
+// export const ajouterAgenda = async (agendaData) => {
+//   try {
+//     const response = await apiAgenda.post('/', agendaData);
+//     return response.data;
+//   } catch (error) {
+//     handleApiError(error, 'Erreur lors de l\'ajout de l\'agenda');
+//   }
+// };
 

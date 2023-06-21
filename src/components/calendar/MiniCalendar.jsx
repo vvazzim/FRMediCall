@@ -1,39 +1,56 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import multiMonthPlugin from '@fullcalendar/multimonth';
-import frLocale from '@fullcalendar/core/locales/fr';
-import DayClickModal from '../Modal/ClickModal';
+import axios from 'axios';
+import DayClickModal from '../Modal/DayClickModal';
+import jwtDecode from 'jwt-decode';
 
 const MiniCalendar = () => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [events, setEvents] = useState([]);
-    const [modalOpen, setModalOpen] = useState(false);
+
+    useEffect(() => {
+        const fetchEvents = async () => {
+            const token = localStorage.getItem('jwtToken');
+            if (!token) {
+                throw new Error('No token found');
+            }
+            const {medecinId} = jwtDecode(token);
+            try {
+                const response = await axios.get(`https://localhost:5000/agenda/event/${medecinId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                // Assurez-vous que les événements sont formatés correctement pour FullCalendar
+                setEvents(response.data.map(event => ({
+                    title: event.title, // Assurez-vous que le champ 'title' existe dans votre data
+                    date: event.date, // Assurez-vous que le champ 'date' existe dans votre data
+                })));
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        fetchEvents();
+    }, []);
+
+    const handleDateClick = (arg) => {
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => setIsModalOpen(false);
 
     return (
-        <div className="p-4 mt-4 bg-white rounded-lg dark:bg-navy-100">
-            {modalOpen && <DayClickModal closeModal={() => setModalOpen(false)} />}
-            <div>
-                <div className="mt-5">
-                    <FullCalendar
-                        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, multiMonthPlugin]}
-                        initialView="dayGridMonth"
-                        locale={frLocale}
-                        headerToolbar={{
-                            start: 'today prev,next',
-                            center: 'title',
-                            end: 'dayGridMonth,timeGridWeek,timeGridDay,multiMonthYear',
-                        }}
-                        height="75vh"
-                        events={events}
-                        selectable={true}
-                        select={() => setModalOpen(true)}
-                        dayCellClassNames="cursor-pointer rounded-lg hover:bg-blue-200 font-bold "
-
-                    />
-                </div>
-            </div>
+        <div>
+            <FullCalendar
+                plugins={[dayGridPlugin, interactionPlugin]}
+                initialView="dayGridMonth"
+                events={events}
+                dateClick={handleDateClick}
+            />
+            {isModalOpen && <DayClickModal closeModal={closeModal}/>}
         </div>
     );
 };

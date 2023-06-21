@@ -1,11 +1,12 @@
 import React,{useState} from 'react';
-import axios from 'axios';
+import { ajouterPatient, ajouterDossierMedical } from '../../../../api';
+
 
 export default function BouttonAjouterP({ closeModal }) {
   const [hasMedicalAccount, setHasMedicalAccount] = useState(false);
-
   const handleSubmit = async (event) => {
     event.preventDefault();
+
     const newUser = {
       nom: event.target.lastName.value,
       prenom: event.target.firstName.value,
@@ -19,14 +20,21 @@ export default function BouttonAjouterP({ closeModal }) {
       NSS: event.target.nss.value,
     };
 
-
-    try {
-      const response = await axios.post('http://localhost:5000/Utilisateur?typeUtilisateur=Patient', newUser);
-      if (response.status === 200) {
+    if (hasMedicalAccount) {
+      try {
+        await ajouterPatient(newUser);
         console.log("Utilisateur ajouté avec succès");
+      } catch (error) {
+        console.error("Erreur lors de l'ajout de l'utilisateur", error);
       }
-    } catch (error) {
-      console.error("Erreur lors de l'ajout de l'utilisateur", error);
+    } else {
+      delete newUser.motDePasse;
+      try {
+        await ajouterDossierMedical(newUser);
+        console.log("Dossier médical ajouté avec succès");
+      } catch (error) {
+        console.error("Erreur lors de l'ajout du dossier médical", error);
+      }
     }
   };
 
@@ -59,49 +67,49 @@ export default function BouttonAjouterP({ closeModal }) {
             </div>
 
             <form onSubmit={handleSubmit}>
-              <div class="grid gap-4 mb-4 sm:grid-cols-2">
+              <div className="grid gap-4 mb-4 sm:grid-cols-2">
                 <div>
 
                   <div>
                     <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Compte médical</label>
                     <div className="flex items-center">
                       <input type="radio" name="medicalAccount" value="withAccount" id="withAccount" required="" className="mr-2" onChange={() => setHasMedicalAccount(true)} />
-                      <label for="withAccount" className="mr-4">Avec compte</label>
+                      <label htmlFor="withAccount" className="mr-4">Avec compte</label>
                       <input type="radio" name="medicalAccount" value="withoutAccount" id="withoutAccount" required="" className="mr-2" onChange={() => setHasMedicalAccount(false)} />
-                      <label for="withoutAccount">Sans compte</label>
+                      <label htmlFor="withoutAccount">Sans compte</label>
                     </div>
                   </div>
 
                   {hasMedicalAccount && (
                       <>
                         <div>
-                          <label for="email" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email</label>
+                          <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email</label>
                           <input type="email" name="email" id="email" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 mb-4 w-full p-2" required="" />
                         </div>
 
                         <div>
-                          <label for="password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Mot de passe</label>
+                          <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Mot de passe</label>
                           <input type="password" name="password" id="password" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 mb-4 w-full p-2" required="" />
                         </div>
                       </>
                   )}
-                  <label for="lastName" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom</label>
-                  <input type="text" name="lastName" id="lastName" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Saisissez le nom" required="" />
+                  <label htmlFor="lastName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom</label>
+                  <input type="text" name="lastName" id="lastName" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Saisissez le nom" required="" />
                 </div>
                 <div>
-                  <label for="firstName" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Prénom</label>
-                  <input type="text" name="firstName" id="firstName" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Saisissez le prénom" required="" />
+                  <label htmlFor="firstName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Prénom</label>
+                  <input type="text" name="firstName" id="firstName" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Saisissez le prénom" required="" />
                 </div>
               </div>
 
               <div>
-                <label for="phone" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Téléphone</label>
-                <input type="text" name="phone" id="phone" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Saisissez le numéro de téléphone" required="" />
+                <label htmlFor="phone" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Téléphone</label>
+                <input type="text" name="phone" id="phone" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Saisissez le numéro de téléphone" required="" />
               </div>
 
               <div>
-                <label for="address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Adresse</label>
-                <input type="text" name="address" id="address" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Saisissez l'adresse" required="" />
+                <label htmlFor="address" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Adresse</label>
+                <input type="text" name="address" id="address" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Saisissez l'adresse" required="" />
               </div>
 
               <div>
@@ -116,9 +124,9 @@ export default function BouttonAjouterP({ closeModal }) {
                 <label htmlFor="sex" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Sexe</label>
                 <div className="flex items-center">
                   <input type="radio" name="sex" value="male" id="sexMale" required="" className="mr-2"/>
-                  <label for="sexMale" className="mr-4">Masculin</label>
+                  <label htmlFor="sexMale" className="mr-4">Masculin</label>
                   <input type="radio" name="sex" value="female" id="sexFemale" required="" className="mr-2"/>
-                  <label for="sexFemale">Féminin</label>
+                  <label htmlFor="sexFemale">Féminin</label>
                 </div>
               </div>
 
@@ -132,8 +140,8 @@ export default function BouttonAjouterP({ closeModal }) {
                        placeholder="Saisissez le numéro de sécurité sociale" required=""/>
               </div>
 
-              <div class="mt-4">
-                <button type="submit" class="inline-flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-lg shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+              <div className="mt-4">
+                <button type="submit" className="inline-flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-lg shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                   Ajouter
                 </button>
               </div>

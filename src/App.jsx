@@ -12,16 +12,14 @@ import Signup from "./views/auth/SignUpForm";
 import jwtDecode from 'jwt-decode';
 
 function App() {
+    const token = localStorage.getItem("jwt");
     let user;
 
-    const token = localStorage.getItem("jwt");
     if (token) {
         try {
             user = jwtDecode(token);
         } catch (error) {
             console.error("Invalid token:", error);
-            // Redirect to login if the token is invalid
-            return <Navigate to="/login" />;
         }
     }
 
@@ -31,10 +29,10 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="auth/*" element={<Auth />} />
-            <Route path="admin/*" element={user && user.userType.toLowerCase() === "medecin" ? <AdminLayout /> : <Navigate to="/login" />} />
+            <Route path="admin/*" element={user && ((user.userType === "medecin") || (user.userType === "Medecin")) ? <AdminLayout /> : <Navigate to="/login" />} />
             <Route path="rtl/*" element={<RtlLayout />} />
             <Route path="user/*" element={<UserPage />} />
-            <Route path="patient/*" element={user && user.userType.toLowerCase() === "patient" ? <PatientLayout /> : <Navigate to="/login" />} />
+            <Route path="patient/*" element={user && ((user.userType === "patient") || (user.userType === "Patient")) ? <PatientLayout /> : <Navigate to="/login" />} />
             <Route path="*" element={<Navigate to="/patient" />} />
         </Routes>
     );

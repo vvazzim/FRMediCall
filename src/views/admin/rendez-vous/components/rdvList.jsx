@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import jwt_decode from 'jwt-decode';
 import { MdAssignmentTurnedIn, MdCheckCircle, MdCancel, MdOutlineError } from 'react-icons/md';
 import AjouterRDV from './addRdv';
 import { obtenirRdv } from '../../../../api';
@@ -11,10 +12,35 @@ const RdvList = () => {
     const [search, setSearch] = useState('');
     const [filters, setFilters] = useState([]);
 
+    // Get the medecin's ID from the token
+    const token = localStorage.getItem('jwt');
+
+    let medecinId;
+
+    if(token) {
+        try {
+            const decodedToken = jwt_decode(token);console.log(decodedToken);
+
+            medecinId = decodedToken._id;
+        } catch (error) {
+            console.error('Error decoding token:', error);
+            localStorage.removeItem('token'); // Remove the invalid token
+            window.location.href = '/login'; // Redirect to the login page
+        }
+    } else {
+        console.log("No token found in localStorage");
+        window.location.href = '/login'; // Redirect to the login page
+    }
+
     useEffect(() => {
         const fetchRdvs = async () => {
+            if (!medecinId) return;  // If medecinId is null, skip fetching rdvs.
             try {
-                let response = await obtenirRdv();
+                let response = await obtenirRdv(medecinId);
+                if (!response) {
+                    console.error('No RDVs received');
+                    return;
+                }
                 if (search) {
                     response = response.filter(rdv =>
                         rdv.patient?.nom?.toLowerCase().includes(search.toLowerCase()));
@@ -29,7 +55,7 @@ const RdvList = () => {
             }
         };
         fetchRdvs();
-    }, [search, filters]);
+    }, [search, filters, medecinId]);
 
     const handleOpenModal = () => {
         setIsModalOpen(true);
@@ -66,6 +92,7 @@ const RdvList = () => {
     const handleFilterChange = (selectedFilters) => {
         setFilters(selectedFilters);
     };
+
 
     return (
         <div className="relative overflow-x-auto shadow-md sm:rounded-lg mt-6 dark:text-white">

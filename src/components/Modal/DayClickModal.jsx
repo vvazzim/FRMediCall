@@ -1,6 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-const DayClickModal = ({ closeModal }) => {
+const DayClickModal = ({ onSubmit, closeModal }) => {
+    const [shift, setShift] = useState('');
+    const [eventType, setEventType] = useState('');
+
+    const handleSubmit = () => {
+        onSubmit(shift, eventType);
+    };
+
     return (
         <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-filter backdrop-blur-sm bg-opacity-50">
             <div className="bg-white dark:bg-navy-700 rounded-lg shadow-lg w-50 max-w-md">
@@ -29,17 +36,37 @@ const DayClickModal = ({ closeModal }) => {
                         </button>
                     </div>
 
-                    <div className="grid gap-4">
-                        {[...Array(10)].map((_, i) => (
-                            <button
-                                key={i}
-                                type="button"
-                                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                            >
-                                Button {i + 1}
-                            </button>
-                        ))}
+                    <div className="mb-4">
+                        <label className="block text-gray-700 text-sm font-bold mb-2">
+                            Shift
+                        </label>
+                        <input
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            type="text"
+                            value={shift}
+                            onChange={(e) => setShift(e.target.value)}
+                        />
                     </div>
+
+                    <div className="mb-4">
+                        <label className="block text-gray-700 text-sm font-bold mb-2">
+                            Type d'événement
+                        </label>
+                        <input
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            type="text"
+                            value={eventType}
+                            onChange={(e) => setEventType(e.target.value)}
+                        />
+                    </div>
+
+                    <button
+                        type="button"
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                        onClick={handleSubmit}
+                    >
+                        Organiser
+                    </button>
                 </div>
             </div>
         </div>
