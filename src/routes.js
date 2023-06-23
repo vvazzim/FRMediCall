@@ -75,7 +75,7 @@ const adminRoutes = [
   {
     name: "Paramétres",
     layout: "/admin",
-    path: "medecins",
+    path: "paramétres",
     icon: <MdSettings className="h-6 w-6" />,
     component: Paramétres,
   },

@@ -1,11 +1,19 @@
 import React,{useState} from 'react';
 import { ajouterPatient, ajouterDossierMedical } from '../../../../api';
-
+import jwtDecode from "jwt-decode";
 
 export default function BouttonAjouterP({ closeModal }) {
   const [hasMedicalAccount, setHasMedicalAccount] = useState(false);
+  const [feedbackMessage, setFeedbackMessage] = useState(null);
+
+  const token = localStorage.getItem('jwt');
+  const decodedToken = jwtDecode(token);
+  console.log("voila",decodedToken)
+
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setFeedbackMessage(null);
 
     const newUser = {
       nom: event.target.lastName.value,
@@ -14,30 +22,37 @@ export default function BouttonAjouterP({ closeModal }) {
       motDePasse: hasMedicalAccount ? event.target.password.value : null,
       telephone: event.target.phone.value,
       adresse: event.target.address.value,
-      typeUtilisateur: 'Patient',
+      typeUtilisateur: decodedToken.userType,
       dateDeNaissance: event.target.dateOfBirth.value,
       sexe: event.target.sex.value,
       NSS: event.target.nss.value,
+      auteur: decodedToken._id,
     };
+
 
     if (hasMedicalAccount) {
       try {
-        await ajouterPatient(newUser);
-        console.log("Utilisateur ajouté avec succès");
+        await ajouterPatient(newUser, token);
+        setFeedbackMessage("Utilisateur ajouté avec succès");
+        event.target.reset();
       } catch (error) {
         console.error("Erreur lors de l'ajout de l'utilisateur", error);
+        setFeedbackMessage("Erreur lors de l'ajout de l'utilisateur");
       }
+
     } else {
       delete newUser.motDePasse;
+      delete newUser.email;
       try {
-        await ajouterDossierMedical(newUser);
-        console.log("Dossier médical ajouté avec succès");
+        await ajouterDossierMedical(newUser,token);
+        setFeedbackMessage("Dossier médical ajouté avec succès");
+        event.target.reset();
       } catch (error) {
         console.error("Erreur lors de l'ajout du dossier médical", error);
+        setFeedbackMessage("Erreur lors de l'ajout du dossier médical");
       }
     }
   };
-
   return (
       <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-filter backdrop-blur-sm bg-opacity-50">
         <div className="bg-white dark:bg-navy-700 rounded-lg shadow-lg w-full max-w-md">
@@ -139,14 +154,17 @@ export default function BouttonAjouterP({ closeModal }) {
                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                        placeholder="Saisissez le numéro de sécurité sociale" required=""/>
               </div>
-
+              {feedbackMessage && (
+                  <div className="feedback-message">
+                    {feedbackMessage}
+                  </div>
+              )}
               <div className="mt-4">
                 <button type="submit" className="inline-flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-lg shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                   Ajouter
                 </button>
               </div>
             </form>
-
           </div>
         </div>
       </div>

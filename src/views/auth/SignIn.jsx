@@ -13,23 +13,32 @@ export default function SignIn() {
 
   const handleLogin = async () => {
     try {
-      const response = await login(email, password);
-      if (response && response.data && response.data.token) {
-        localStorage.removeItem('jwt');
+      localStorage.clear();
+      if (!email || !password) {
+        console.error('Email and password are required');
+        return;
+      }
 
+      const response = await login(email, password);
+
+      if (response.status >= 400) {
+        console.error('Server error:', response);
+        return;
+      }
+
+      if (response && response.data && response.data.token) {
         localStorage.removeItem('jwt');
         localStorage.setItem('jwt', response.data.token);
 
-        console.log('Raw JWT:', response.data.token);
-
         const decoded = jwtDecode(response.data.token);
-        console.log('Decoded JWT:', decoded);
 
-        if (decoded.userType === "admin" || decoded.userType === "Admin") {
+        const userType = decoded.userType.toLowerCase();
+
+        if (userType === "admin") {
           navigate("/admin");
-        } else if (decoded.userType === "patient" || decoded.userType === "Patient") {
+        } else if (userType === "patient") {
           navigate("/patient");
-        } else if (decoded.userType === "medecin" || decoded.userType === "Medecin") {
+        } else if (userType === "medecin") {
           navigate("/admin");
         } else {
           console.log('Unrecognized userType');
@@ -41,6 +50,7 @@ export default function SignIn() {
       console.error('Error during login:', error);
     }
   };
+
 
 
 

@@ -1,5 +1,6 @@
 // src/api.js
 import axios from 'axios';
+import jwtDecode from "jwt-decode";
 
 // Configuring Axios Instances for Different Endpoints
 const API_BASE_URL = 'http://localhost:5000';
@@ -9,8 +10,8 @@ export const apiRdv = axios.create({ baseURL: `${API_BASE_URL}/Rdv` });
 const apiAgenda = axios.create({ baseURL: `${API_BASE_URL}/agendas` });
 const apiCabinetMedical = axios.create({ baseURL: `${API_BASE_URL}/cabinetMedical` });
 const apiConsultation = axios.create({ baseURL: `${API_BASE_URL}/consultation` });
-const apiUser = axios.create({ baseURL: `${API_BASE_URL}/user` });
-const apiDossierMed = axios.create({ baseURL: `${API_BASE_URL}/dossierMedical` });
+const apiUser = axios.create({ baseURL: `${API_BASE_URL}/Utilisateur` });
+const apiDossierMed = axios.create({ baseURL: `${API_BASE_URL}/DossierMedical` });
 
 // Error Handler Function
 const handleApiError = (error, errorMessage) => {
@@ -54,7 +55,7 @@ const obtenirUtilisateurs = async (typeUtilisateur, token) => {
 };
 
 // Generic Function to Add User
-const ajouterUtilisateur = async (typeUtilisateur, data) => {
+export const ajouterUtilisateur = async (typeUtilisateur, data) => {
   try {
     const response = await apiUtilisateur.post('/', { ...data, typeUtilisateur });
     return response.data;
@@ -66,9 +67,22 @@ const ajouterUtilisateur = async (typeUtilisateur, data) => {
 // Now, you can use these functions to get and add patients, doctors, and assistants
 export const obtenirPatient = async (token) => obtenirUtilisateurs('Patient', token);
 export const obtenirMedecins = async (token) => obtenirUtilisateurs('Medecin', token);
-export const ajouterPatient = async (data) => ajouterUtilisateur('Patient', data);
 export const ajouterMedecin = async (data) => ajouterUtilisateur('Medecin', data);
 export const ajouterAssistant = async (data) => ajouterUtilisateur('Assistant', data);
+
+export const ajouterPatient = async (newUser, token) => {
+  try {
+    const response = await apiUtilisateur.post('/', newUser, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    handleApiError(error, "Erreur lors de l'ajout de l'utilisateur");
+  }
+};
+
 
 // Other API calls
 export const obtenirConsultationsPatientConnecte = async (token) => {
@@ -197,9 +211,24 @@ export const obtenirConsultation = async () => {
   }
 };
 
+export const modifierUtilisateur = async (utilisateurId, newData, token) => {
+  try {
+    const response = await apiUtilisateur.put(`/${utilisateurId}`, newData, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    handleApiError(error, 'Erreur lors de la modification de l\'utilisateur');
+  }
+};
+
+
 export const obtenirUtilisateur = async (token) => {
   try {
-    const response = await apiUser.get('/', {
+    const response = await apiUtilisateur.get('/', {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -210,14 +239,19 @@ export const obtenirUtilisateur = async (token) => {
   }
 };
 
-export const ajouterDossierMedical = async (dossierMedicalData) => {
+export const ajouterDossierMedical = async (dossierMedicalData, token) => {
   try {
-    const response = await apiDossierMed.post('/', dossierMedicalData);
+    const response = await apiDossierMed.post('', dossierMedicalData, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
     return response.data;
   } catch (error) {
     handleApiError(error, 'Error adding medical record');
   }
 };
+
 
 export const obtenirPatientsRdvMedecin = async (medecinId, token) => {
   try {
@@ -285,4 +319,40 @@ export const obtenirAgenda = async (userId) => {
 //     handleApiError(error, 'Erreur lors de l\'ajout de l\'agenda');
 //   }
 // };
+
+
+
+export const obtenirPatientParId = async (patientId, token) => {
+  try {
+    const response = await apiUtilisateur.get(`/${patientId}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (response.status !== 200) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error(`Failed to fetch patient with ID ${patientId}:`, error);
+  }
+};
+
+const getToken = () => {
+  const token = localStorage.getItem('jwt');
+  const decodedToken = jwtDecode(token);
+  const medecinId = decodedToken._id;
+
+  if (!medecinId) {
+    console.error("Impossible de récupérer l'ID du médecin");
+    return null;
+  }
+
+  return { token, medecinId };
+}
+
+
 
