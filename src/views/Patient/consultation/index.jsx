@@ -1,7 +1,7 @@
 import React from 'react';
 import ListConsultPatient from './components/ListConsultPatient';
 
-const ConsultationPage = () => {
+const ConsultationPatient = () => {
     return (
         <>
             <ListConsultPatient />
@@ -9,4 +9,4 @@ const ConsultationPage = () => {
     );
 };
 
-export default ConsultationPage;
+export default ListConsultPatient;

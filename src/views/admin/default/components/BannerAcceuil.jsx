@@ -5,13 +5,11 @@ import Card from 'components/card';
 import axios from 'axios';
 import jwtDecode from 'jwt-decode';
 
-const Banner = () => {
+const Banner = ({ statistic }) => {
     const [medecin, setMedecin] = useState(null);
-    const [nbrRdv, setNbrRdv] = useState(0);
-
+    const [nbrConsultations, setNbrConsultations] = useState(0); // Renamed from nbrRdv
+    const token = localStorage.getItem('jwt');
     useEffect(() => {
-        const token = localStorage.getItem('token');
-
         if (!token) {
             console.log('No token found!');
             return;
@@ -19,7 +17,12 @@ const Banner = () => {
 
         try {
             const decodedToken = jwtDecode(token);
-            const idMedecin = decodedToken.idMedecin;
+            if (decodedToken.userType !== 'Medecin') {
+                console.log('Not a Medecin type user!');
+                return;
+            }
+
+            const idMedecin = decodedToken._id;
             const config = { headers: { Authorization: `Bearer ${token}` } };
 
             axios.get(`http://localhost:5000/Utilisateur/${idMedecin}`, config)
@@ -30,13 +33,13 @@ const Banner = () => {
                     console.error('Erreur lors de la récupération du médecin!', error);
                 });
 
-            axios.get(`http://localhost:5000/rdv/${idMedecin}`, config)
+            axios.get(`http://localhost:5000/Consultation/medecin/${idMedecin}`, config)
                 .then(response => {
-                    const rendezvous = response.data;
-                    setNbrRdv(rendezvous.length);
+                    const consultations = response.data;
+                    setNbrConsultations(consultations.length); // Renamed from setNbrRdv
                 })
                 .catch(error => {
-                    console.error('Erreur en récupérant les rendez-vous!', error);
+                    console.error('Erreur en récupérant les consultations!', error);
                 });
         } catch (error) {
             console.log('Error decoding token:', error);
@@ -50,24 +53,22 @@ const Banner = () => {
                 className="relative flex justify-center w-full h-32 mt-1 bg-cover rounded-xl"
                 style={{ backgroundImage: `url(${banner})` }}
             >
-                <div className="absolute -bottom-12 flex h-[87px] w-[87px] items-center justify-center rounded-full border-[4px] border-white bg-pink-400 dark:!border-navy-700">
-                    <img className="w-full h-full rounded-full" src={avatar} alt="" />
-                </div>
+
             </div>
 
             {/* Name and position */}
             <div className="flex flex-col items-center mt-16">
                 <h4 className="text-xl font-bold text-navy-700 dark:text-white">
-                    {medecin && medecin.nom }
+                    {medecin && medecin.nom}
                 </h4>
-                <p className="text-base font-normal text-gray-600">Médecin</p>
+                <p className="text-base font-normal text-gray-600">Spécialité</p>
             </div>
 
             {/* Number of appointments */}
             <div className="mt-6 mb-3 flex gap-4 md:!gap-14">
                 <div className="flex flex-col items-center justify-center">
-                    <p className="text-2xl font-bold text-navy-700 dark:text-white">{nbrRdv}</p>
-                    <p className="text-sm font-normal text-gray-600">NBR. de RDV</p>
+                    <p className="text-2xl font-bold text-navy-700 dark:text-white">{nbrConsultations}</p>
+                    <p className="text-sm font-normal text-gray-600">Consultations</p>
                 </div>
             </div>
         </Card>

@@ -101,10 +101,10 @@ export default function PatientListPage() {
   }
 
   return (
-      <Card className="bg-gray-50 dark:bg-navy-900 p-3 sm:p-5 antialiased">
-        <div className="mx-auto max-w-screen-xl px-1 lg:px-19">
-          <div className="bg-white dark:bg-navy-800 relative shadow-md sm:rounded-lg overflow-hidden">
-            <div className="flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4">
+      <Card className="p-3 antialiased bg-gray-50 dark:bg-navy-900 sm:p-5">
+        <div className="max-w-screen-xl px-1 mx-auto lg:px-19">
+          <div className="relative overflow-hidden bg-white shadow-md dark:bg-navy-800 sm:rounded-lg">
+            <div className="flex flex-col items-center justify-between p-4 space-y-3 md:flex-row md:space-y-0 md:space-x-4">
               <div className="w-full md:w-1/2">
                 <form className="flex items-center">
                   <label for="simple-search" className="sr-only">Recherche</label>
@@ -115,7 +115,7 @@ export default function PatientListPage() {
                       </svg>
                     </div>
                     <input type="text" id="simple-search"
-                           className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                           className="block w-full p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-primary-500 focus:border-primary-500 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                            placeholder="Search" required=""
                            value={search}
                            onChange={handleSearchChange}/>
@@ -123,14 +123,14 @@ export default function PatientListPage() {
                   </div>
                 </form>
               </div>
-              <div className="w-full md:w-auto flex flex-col md:flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0">
+              <div className="flex flex-col items-stretch justify-end flex-shrink-0 w-full space-y-2 md:w-auto md:flex-row md:space-y-0 md:items-center md:space-x-3">
                 <div>
                   <button
                       type="button"
                       id="createProductModalButton"
                       data-modal-target="createProductModal"
                       data-modal-toggle="createProductModal"
-                      className="flex items-center justify-center text-black bg-primary-700 hover:bg-gray-100 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg border text-sm px-4 py-2 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+                      className="flex items-center justify-center px-4 py-2 text-sm font-medium text-black border rounded-lg bg-primary-700 hover:bg-gray-100 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
                       onClick={() => setShowModal(true)}
                   >
                     <svg className="h-3.5 w-3.5 mr-2" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -140,28 +140,28 @@ export default function PatientListPage() {
                   </button>
                   {showModal && <BouttonAjouterP closeModal={() => setShowModal(false)} />}
                 </div>
-                <div className="flex items-center space-x-3 w-full md:w-auto">
-                  <button id="actionsDropdownButton" data-dropdown-toggle="actionsDropdown" className="w-full md:w-auto flex items-center justify-center py-2 px-4 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700" type="button">
+                <div className="flex items-center w-full space-x-3 md:w-auto">
+                  <button id="actionsDropdownButton" data-dropdown-toggle="actionsDropdown" className="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg md:w-auto focus:outline-none hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700" type="button">
                     <svg className="-ml-1 mr-1.5 w-5 h-5" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                       <path clip-rule="evenodd" fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
                     </svg>
                     Actions
                   </button>
-                  <div id="actionsDropdown" className="hidden z-10 w-44 bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600">
+                  <div id="actionsDropdown" className="z-10 hidden bg-white divide-y divide-gray-100 rounded shadow w-44 dark:bg-gray-700 dark:divide-gray-600">
                     <ul className="py-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="actionsDropdownButton">
                       <li>
-                        <a href="#" className="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Mass Edit</a>
+                        <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Mass Edit</a>
                       </li>
                     </ul>
                     <div className="py-1">
-                      <a href="#" className="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Delete all</a>
+                      <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Delete all</a>
                     </div>
                   </div>
-                  <button id="filterDropdownButton" data-dropdown-toggle="filterDropdown" className="w-full md:w-auto flex items-center justify-center py-2 px-4 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700" type="button">
-                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" className="h-4 w-4 mr-2 text-gray-400" viewbox="0 0 20 20" fill="currentColor">
+                  <button id="filterDropdownButton" data-dropdown-toggle="filterDropdown" className="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg md:w-auto focus:outline-none hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700" type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" className="w-4 h-4 mr-2 text-gray-400" viewbox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd" />
                     </svg>
-                    Filter
+                    Filtre
                     <svg className="-mr-1 ml-1.5 w-5 h-5" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                       <path clip-rule="evenodd" fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
                     </svg>
@@ -183,42 +183,40 @@ export default function PatientListPage() {
                 </div>
               </div>
             </div>
-            <div className="overflow-auto max-w-screen-xl">
+            <div className="max-w-screen-xl overflow-auto">
               <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                 <thead>
                 <tr>
-                  <th scope="col" className="px-4 py-3 text-white">NOM</th>
-                  <th scope="col" className="px-4 py-3">PRENOM</th>
-                  <th scope="col" className="px-4 py-3">AGE</th>
-                  <th scope="col" className="px-4 py-3">SEXE</th>
-                  <th scope="col" className="px-4 py-3">TELEPHONE</th>
-                  <th scope="col" className="px-4 py-3">TYPE</th>
-                  <th scope="col" className="px-4 py-3">PROFILE</th>
+                  <th scope="col" className="px-4 py-3 dark:text-white">NOM</th>
+                  <th scope="col" className="px-4 py-3 dark:text-white">PRENOM</th>
+                  <th scope="col" className="px-4 py-3 dark:text-white">AGE</th>
+                  <th scope="col" className="px-4 py-3 dark:text-white">SEXE</th>
+                  <th scope="col" className="px-4 py-3 dark:text-white">telephone</th>
+                  <th scope="col" className="px-4 py-3 dark:text-white">Type</th>
+                  <th scope="col" className="px-4 py-3 dark:text-white">Profile</th>
                 </tr>
                 </thead>
 
                 <tbody>
-                {patients.map((patient, index) => (
-                    <tr key={index} className="border-b border-gray-200 dark:border-gray-600">
-                      <td className="px-4 py-3 text-gray-900 dark:text-white">{patient.informationsPatient?.nom || patient.nom}</td>
-                      <td className="px-4 py-3">{patient.informationsPatient?.prenom || patient.prenom}</td>
-                      <td className="px-4 py-3">{calculateAge(patient.informationsPatient?.dateNaissance || patient.dateNaissance)}</td>
-                      <td className="px-4 py-3">{patient.informationsPatient?.sexe || patient.sexe}</td>
-                      <td className="px-4 py-3">{patient.informationsPatient?.telephone || patient.telephone}</td>
-                      <td className="px-4 py-3">{patient.type === 'patient' ? 'Patient' : 'Dossier Médical'}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center space-x-4">
-                          <ThreeDotsDropdown />
-                        </div>
+                {patients.map(patient => (
+                    <tr className="relative border-b dark:border-gray-700">
+                      <th scope="row" className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white">{patient.nom || ''}</th>
+                      <td className="px-4 py-3">{patient.prenom || ''}</td>
+                      <td className="px-4 py-3">{patient.age || ''}</td>
+                      <td className="px-4 py-3">{patient.sexe || ''}</td>
+                      <td className="px-4 py-3">{patient.telephone || ''}</td>
+                      <td className="px-4 py-3">{patient.type}</td>
+                      <td className="flex items-center justify-end px-4 py-3">
+                        <ThreeDotsDropdown/>
                       </td>
                     </tr>
                 ))}
                 </tbody>
-              </table>
 
+              </table>
             </div>
-                  </div>
-                  </div>
-                  </Card>
+          </div>
+        </div>
+      </Card>
                   );
                   }

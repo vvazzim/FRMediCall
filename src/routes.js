@@ -21,6 +21,7 @@ import ForgetPwd from "views/auth/ForgetP";
 import {
   MdHome,
   MdPeopleAlt,
+  MdMedicalServices,
   MdLock,
   MdSettings,
   MdAssignmentTurnedIn,
@@ -35,6 +36,8 @@ import {
 } from "react-icons/io5";
 import PatientRdvPage from "./views/Patient/RDV/index";
 import MedecinPage from "./views/Patient/medecins/index";
+import Dashboard from "./views/Patient/default";
+import ListConsultPatient from "./views/Patient/consultation/components/ListConsultPatient";
 
 const adminRoutes = [
   {
@@ -94,27 +97,27 @@ const patientRoutes = [
     layout: "/patient",
     path: "default",
     icon: <MdHome className="h-6 w-6" />,
-    component: DashboardPage,
+    component: Dashboard,
   },
   {
     name: "Consultation",
     layout: "/patient",
     path: "consultation",
     icon: <RiStethoscopeLine className="h-6 w-6" />,
-    component: ConsultationPage,
+    component: ListConsultPatient,
   },
   {
     name: "Medecins",
     layout: "/patient",
     path: "medecins", // <-- changed this from "" to "medecins"
-    icon: <RiStethoscopeLine className="h-6 w-6" />,
+    icon: <MdMedicalServices className="h-6 w-6" />,
     component: MedecinPage,
   },
   {
     name: "Rendez-Vous",
     layout: "/patient",
     path: "RDV",
-    icon: <RiStethoscopeLine className="h-6 w-6" />,
+    icon: <MdAssignmentTurnedIn className="h-6 w-6" />,
     component: RdvPageP,
   },
 ];

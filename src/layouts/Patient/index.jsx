@@ -29,7 +29,7 @@ const PatientLayout = () => {
         <div className="flex h-full w-full">
             <Sidebar open={open} onClose={() => setOpen(false)} />
             {/* Navbar & Main Content */}
-            <div className="h-full w-full">
+            <div className="h-full w-full dark:bg-navy-800">
                 {/* Main Content */}
                 <main
                     className={`mx-[12px] h-full flex-none transition-all md:pr-2 xl:ml-[313px]`}

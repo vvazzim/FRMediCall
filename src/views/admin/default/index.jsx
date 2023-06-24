@@ -1,100 +1,55 @@
-import MiniCalendar from 'components/calendar/MiniCalendar';
-import WeeklyRevenue from "views/admin/default/components/WeeklyRevenue";
-import TotalSpent from "views/admin/default/components/TotalSpent";
-import PieChartCard from "views/admin/default/components/PieChartCard";
-import { IoMdHome } from "react-icons/io";
-import { IoDocuments } from "react-icons/io5";
-import { MdBarChart, MdDashboard } from "react-icons/md";
-import { columnsDataCheck, columnsDataComplex } from "./variables/columnsData";
-
-import Widget from "components/widget/Widget";
-import CheckTable from "views/admin/default/components/CheckTable";
-import ComplexTable from "views/admin/default/components/ComplexTable";
-import DailyTraffic from "views/admin/default/components/DailyTraffic";
 import TaskCard from "views/admin/default/components/TaskCard";
-import tableDataCheck from "./variables/tableDataCheck.json";
-import tableDataComplex from "./variables/tableDataComplex.json";
 import BannerAcceuil from "./components/BannerAcceuil";
-import Banner from "../paramétres/components/Banner";
-
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import jwtDecode from 'jwt-decode';
+import MiniCalendar from "../../../components/calendar/MiniCalendar";
 const Dashboard = () => {
+  const [nbrConsultations, setNbrConsultations] = useState(0);
+
+  useEffect(() => {
+    const token = localStorage.getItem('jwt');
+    console.log(token);
+    if (!token) {
+      console.log('No token found!');
+      return;
+    }
+
+    try {
+      const decodedToken = jwtDecode(token);
+      const idMedecin = decodedToken._id;
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+
+      axios.get(`http://localhost:5000/Consultation/medecin/${idMedecin}`, config)
+          .then(response => {
+            const consultations = response.data;
+            setNbrConsultations(consultations.length);
+          })
+          .catch(error => {
+            console.error('Erreur en récupérant les consultations!', error);
+          });
+    } catch (error) {
+      console.log('Error decoding token:', error);
+    }
+  }, []);
+
   return (
-    <div>
-    {/* Card widget */}
+      <div>
+        <div className="grid grid-cols-1 gap-5 mt-5 xl:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 rounded-[20px] md:grid-cols-2">
+            <BannerAcceuil statistic={{ value: nbrConsultations, name: "NBR. de consultations" }} />
 
-
-      {/*<div className="mt-3 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-3 3xl:grid-cols-6">*/}
-      {/*  <Widget*/}
-      {/*    icon={<MdBarChart className="h-7 w-7" />}*/}
-      {/*    title={""}*/}
-      {/*    subtitle={""}*/}
-      {/*  />*/}
-      {/*  <Widget*/}
-      {/*    icon={<IoDocuments className="h-6 w-6" />}*/}
-      {/*    title={""}*/}
-      {/*    subtitle={""}*/}
-      {/*  />*/}
-      {/*  <Widget*/}
-      {/*    icon={<MdBarChart className="h-7 w-7" />}*/}
-      {/*    title={""}*/}
-      {/*    subtitle={""}*/}
-      {/*  />*/}
-      {/*  <Widget*/}
-      {/*    icon={<MdDashboard className="h-6 w-6" />}*/}
-      {/*    title={""}*/}
-      {/*    subtitle={""}*/}
-      {/*  />*/}
-      {/*  <Widget*/}
-      {/*    icon={<MdBarChart className="h-7 w-7" />}*/}
-      {/*    title={""}*/}
-      {/*    subtitle={""}*/}
-      {/*  />*/}
-      {/*  <Widget*/}
-      {/*    icon={<IoMdHome className="h-6 w-6" />}*/}
-      {/*    title={""}*/}
-      {/*    subtitle={""}*/}
-      {/*  />*/}
-      {/*</div>*/}
-
-
-
-      {/* Tables & Charts */}
-
-      <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-2">
-        {/*/!* Check Table *!/*/}
-        {/*<div>*/}
-        {/*  <CheckTable*/}
-        {/*    columnsData={columnsDataCheck}*/}
-        {/*    tableData={tableDataCheck}*/}
-        {/*  />*/}
-        {/*</div>*/}
-
-        {/* Traffic chart & Pie Chart */}
-
-        <div className="grid grid-cols-1 gap-5 rounded-[20px] md:grid-cols-2">
-
-          <BannerAcceuil/>
-          <BannerAcceuil/>
+            <BannerAcceuil />
+          </div>
+          <div className="grid grid-cols-1 gap-5 rounded-[20px] md:grid-cols-2">
+            <BannerAcceuil />
+            <TaskCard />
+          </div>
         </div>
-
-
-
-        {/* Task chart & Calendar */}
-
-        <div className="grid grid-cols-1 gap-5 rounded-[20px] md:grid-cols-2">
-
-          <BannerAcceuil/>
-          <TaskCard />
+        <div className="col-span-4 lg:!mb-0">
+            <MiniCalendar/>
         </div>
       </div>
-      {/* Charts */}
-
-
-        <div className="col-span-4 lg:!mb-0">
-            <MiniCalendar />
-
-        </div>
-    </div>
   );
 };
 

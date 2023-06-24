@@ -85,19 +85,22 @@ export const ajouterPatient = async (newUser, token) => {
 
 
 // Other API calls
-export const obtenirConsultationsPatientConnecte = async (token) => {
+export const obtenirConsultationsPatientConnecte = async (id, token) => {
   try {
-    const response = await apiConsultation.get('/', {
+    const response = await apiConsultation.get(`/patient/${id}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
     });
 
-    return response.data; // Replace with the actual data structure your API returns
+    return response.data;
   } catch (error) {
-    handleApiError(error, 'Erreur lors de la récupération des consultations');
+    console.error('Erreur lors de la récupération des consultations:', error);
+    return null;
   }
 };
+
+
 
 export const obtenirDossiersMedicauxParMedecin = async (medecinId, token) => {
   try {

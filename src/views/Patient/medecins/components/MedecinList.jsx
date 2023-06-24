@@ -3,12 +3,25 @@ import { MdAssignmentTurnedIn, MdCheckCircle, MdCancel, MdOutlineError } from 'r
 import { obtenirMedecins } from '../../../../api'; // Votre API pour obtenir la liste des médecins
 import ActionDropdown from '../../../../components/dropdown/ActionDropdown';
 import { RiStethoscopeLine } from 'react-icons/ri';
+import AjouterRDV from "./AddRdv";
 
 const ListMedecins = () => {
     const menuItems = ['Effacé', 'Item 2', 'Item 3'];
     const [medecins, setMedecins] = useState([]);
     const [search, setSearch] = useState('');
     const [filters, setFilters] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [currentMedecin, setCurrentMedecin] = useState(null);
+
+    const openModal = (medecin) => {
+        setCurrentMedecin(medecin);
+        setShowModal(true);
+    }
+
+    const closeModal = () => {
+        setCurrentMedecin(null);
+        setShowModal(false);
+    }
 
     useEffect(() => {
         fetchMedecins();
@@ -17,12 +30,12 @@ const ListMedecins = () => {
     const fetchMedecins = async () => {
         try {
             let response = await obtenirMedecins();
-            if (!response) response = []; // Ensure response is always an array
+            if (!response) response = [];
             if (search) {
                 response = response.filter(medecin =>
                     medecin.nom?.toLowerCase().includes(search.toLowerCase()));
             }
-            console.log("Medecins: ", response); // ajout d'une instruction de journalisation
+            console.log("Medecins: ", response);
             setMedecins(response);
         } catch (error) {
             console.error('Error fetching medecins:', error);
@@ -39,7 +52,7 @@ const ListMedecins = () => {
 
     return (
 
-        <section className="p-3 antialiased bg-gray-50 dark:bg-navy-900 sm:p-5">
+        <section className="p-3 antialiased bg-gray-50 dark:bg-navy-900 sm:p-5 dark:bg-navy-700">
             <div className="max-w-screen-xl px-1 mx-auto lg:px-19">
                 <div className="relative overflow-hidden bg-white shadow-md dark:bg-navy-800 sm:rounded-lg">
                     <div className="flex flex-col items-center justify-between p-4 space-y-3 md:flex-row md:space-y-0 md:space-x-4">
@@ -108,62 +121,64 @@ const ListMedecins = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="h-40 max-w-screen-xl overflow-x">
-                        <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                    <div className="overflow-x-auto" style={{minHeight: '40px', maxHeight: '400px'}}>
+                    <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                             <thead>
                             <tr>
                                 <th scope="col" className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
-                                    Patient
+                                    Dr.
                                 </th>
                                 <th scope="col" className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
-                                    Médecin
+                                    E-Mail
                                 </th>
                                 <th scope="col" className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
-                                    Date
+                                    Tel
                                 </th>
                                 <th scope="col" className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
-                                    Diagnostic
+
                                 </th>
                             </tr>
                             </thead>
-                            <tbody>
-                            {Array.isArray(medecins) && medecins.map((medecin) => (
-                                <tr key={medecin.id}>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="flex items-center">
-                                            <div className="flex-shrink-0 w-10 h-10">
-                                                <RiStethoscopeLine className="w-10 h-10 text-gray-400" />
+                        <tbody>
+                        {Array.isArray(medecins) && medecins.map((medecin) => (
+                            <tr key={medecin.id}>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="flex items-center">
+                                        <div className="flex-shrink-0 w-10 h-10">
+                                            <RiStethoscopeLine className="w-10 h-10 text-gray-400" />
+                                        </div>
+                                        <div className="flex-grow">
+                                            <div className="text-sm font-medium text-gray-900">
+                                                {medecin.nom} {medecin.prenom}
                                             </div>
-                                            <div className="flex-grow">
-                                                <div className="text-sm font-medium text-gray-900">
-                                                    {medecin.nom} {medecin.prenom} // Nom du medecin
-                                                </div>
-                                                <div className="text-sm text-gray-500">
-                                                    {medecin.specialite} // Specialité du medecin
-                                                </div>
+                                            <div className="text-sm text-gray-500">
+                                                {medecin.specialite}
                                             </div>
                                         </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                                        {medecin.email} // Email du médecin
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                                        {medecin.telephone} // Téléphone du médecin
-                                    </td>
-                                    <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                        <a href="#" className="text-primary-600 hover:text-primary-900">
-                                            Modifier
-                                        </a>
-                                    </td>
-                                </tr>
-                            ))}
-                            </tbody>
-                        </table>
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                                    {medecin.email}
+                                </td>
+                                <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                                    {medecin.telephone}
+                                </td>
+                                <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                                    {medecin.adresse}
+                                </td>
+                                <td className="px-6 py-4 text-sm text-right text-gray-500 whitespace-nowrap">
+                                    <button className="px-4 py-2 font-semibold text-white bg-blue-500 rounded-lg hover:bg-blue-700" onClick={() => openModal(medecin)}>Ajouter RDV</button>
+                                </td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
                     </div>
                 </div>
             </div>
+            {showModal && <AjouterRDV medecin={currentMedecin} closeModal={closeModal} />}
         </section>
-
     );
-}
+};
+
 export default ListMedecins;

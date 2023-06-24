@@ -4,6 +4,8 @@
   import AjouterConsultation from './PatientConsultationModal';
   import { obtenirConsultationsMedId } from '../../../../api';
   import ActionDropdown from '../../../../components/dropdown/ActionDropdown';
+  import Card from "../../../../components/card";
+  import {RiStethoscopeLine} from "react-icons/ri";
 
   const ConsultationList = () => {
     const menuItems = ['Effacé', 'Item 2', 'Item 3'];
@@ -83,19 +85,19 @@
     };
 
     return (
-        <div className="relative overflow-x-auto shadow-md sm:rounded-lg mt-6 dark:text-white">
-          <div className="w-full md:w-auto flex items-center justify-between pb-4 g-whitbe dark:bg-gray-900">
+        <div className=" relative mt-4 overflow-x-auto shadow-md sm:rounded-lg dark:text-white">
+          <div className="flex items-center justify-between w-full pb-4 md:w-auto  dark:bg-gray-900">
             <div className="flex space-x-3">
-              <ActionDropdown items={menuItems}>Action</ActionDropdown>
+              <ActionDropdown items={menuItems}>Actions</ActionDropdown>
               <button
-                  className="relative w-full m-2 flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                  className="relative flex justify-center w-full px-4 py-2 m-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700"
                   onClick={handleOpenModal}
               >
                 Ajouter une consultation
               </button>
             </div>
             <input
-                className="w-full md:w-auto bg-white dark:bg-gray-800 focus:outline-none focus:shadow-outline border border-gray-300 rounded-lg py-2 px-4 appearance-none leading-normal m-2"
+                className="w-full px-4 py-2 m-2 leading-normal bg-white border border-gray-300 rounded-lg appearance-none md:w-auto dark:bg-gray-800 focus:outline-none focus:shadow-outline"
                 type="text"
                 placeholder="Recherche par nom du patient"
                 value={search}
@@ -105,39 +107,34 @@
 
           {isModalOpen && <AjouterConsultation closeModal={handleCloseModal} />}
 
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+          <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
             <thead>
             <tr>
-              <th className="align-middle">Patient</th>
-              <th className="align-middle">Date de consultation</th>
-              <th className="align-middle">Diagnostic</th>
+              <th scope="col" className="px-4 py-3 text-navy-600 dark:text-white">Patient</th>
+              <th scope="col" className="px-4 py-3 text-navy-600 dark:text-white">Date de consultation</th>
+              <th scope="col" className="px-4 py-3 text-navy-600 dark:text-white">Diagnostic</th>
             </tr>
             </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-800">
+            <tbody>
             {consultations.map((consultation) => (
-                <tr key={consultation._id} className="h-12">
-                  <td className="align-middle">
-                    <div className="flex items-center ml-3">
-                      <button className="text-blue-500 hover:text-blue-700 mr-2">
-                        <MdAssignmentTurnedIn size={25} />
-                      </button>
-                      {consultation.patient?.nom}
+                <tr className="relative border-b dark:border-gray-700">
+                  <th scope="row" className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                    <div className="flex items-center">
+                      <RiStethoscopeLine size={35} className="mr-2 text-blue-500" />
+                      {`${consultation.patient?.nom || ''} ${consultation.patient?.prenom || ''}`}
                     </div>
+                  </th>
+                  <td className="px-4 py-3 text-navy-800 dark:text-white">{formatConsultationDate(consultation.date) || ''}</td>
+                  <td className="px-4 py-3 text-navy-700 dark:text-white">{consultation.diagnostic || ''}</td>
+                  <td className="flex items-center justify-end px-4 py-3">
+
                   </td>
-                  <td className="align-middle">{formatConsultationDate(consultation.date)}</td>
-                  <td className="align-middle">{consultation.diagnostic}</td>
                 </tr>
             ))}
             </tbody>
-
-
-
-
-
           </table>
-        </div>
-    );
-  };
 
+        </div>
+    );}
 
   export default ConsultationList;
